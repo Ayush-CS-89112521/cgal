@@ -133,6 +133,11 @@ void partition_graph(const TriangleMesh& tm,
   CGAL_assertion((*options)[METIS_OPTION_NUMBERING] == -1 || // default initialization is '-1'
                  (*options)[METIS_OPTION_NUMBERING] == 0);
 
+#if defined(CGAL_SCOTCH_ENABLED)
+  static_assert(!sizeof(TriangleMesh),
+    "CGAL::METIS::partition_graph() requires METIS because Scotch does not provide "
+    "METIS_PartMeshNodal. Use CGAL::METIS::partition_dual_graph() for Scotch mesh partitioning.");
+#else
   CGAL_assertion_code(int ret =)
     METIS_PartMeshNodal(&ne, &nn, eptr, eind,
                         nullptr /* nodes weights */, nullptr /* nodes sizes */,
@@ -142,6 +147,7 @@ void partition_graph(const TriangleMesh& tm,
                         &objval, epart, npart);
 
   CGAL_assertion(ret == METIS_OK);
+#endif
 
   Output_vertex_partition_ids vo;
   Output_face_partition_ids fo;
